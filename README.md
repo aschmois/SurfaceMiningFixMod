@@ -41,3 +41,5 @@ sharedClassLoader=true
   - 
 
 Thanks ago for all your help and your great mod loader.
+
+[Ago's Mod Loader](http://forum.wurmonline.com/index.php?/topic/133085-released-server-mod-loader-priest-crops-seasons-server-packs-bag-of-holding/)
