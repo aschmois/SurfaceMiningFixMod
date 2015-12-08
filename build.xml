@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="jar" name="SurfaceMiningFix">
+	<property name="buildDir" value="build/surfaceminingfix" />
+	<property name="version" value="0.1" />
+	<property name="jarName" value="surfaceminingfix-${version}.jar" />
+	<property name="buildPath" value="${buildDir}/${jarName}" />
+	<propertyfile file="build/surfaceminingfix.properties">
+		<entry key="classname" value="com.schmois.wurmunlimited.mods.surfaceminingfix.SurfaceMiningFixMod" />
+		<entry key="classpath" value="${jarName}" />
+		<entry key="sharedClassLoader" value="true" />
+		<entry key="addSpell" default="true" />
+		<entry key="spellCost" type="int" default="50" />
+		<entry key="spellDifficulty" type="int" default="60" />
+		<entry key="spellCooldown" type="int" default="0" />
+		
+		<entry key="debug" default="false" />
+	</propertyfile>
+	<path id="jar-project-classpath">
+		<fileset dir="lib" includes="*.jar" />
+	</path>
+
+	<target name="clean">
+		<delete dir="bin" />
+		<mkdir dir="bin" />
+	</target>
+
+	<target name="copy-non-java-files">
+		<copy todir="bin" includeemptydirs="false">
+			<fileset dir="src" excludes="**/*.java" />
+		</copy>
+	</target>
+
+	<target name="compile-jar-classes" depends="clean,copy-non-java-files">
+		<javac verbose="false" srcdir="src" destdir="bin" debug="true" includes="**/*.java" classpathref="jar-project-classpath" />
+	</target>
+	<target name="clean-jar">
+		<delete dir="${buildPath}" />
+		<mkdir dir="${buildDir}" />
+
+	</target>
+
+	<target name="jar">
+		<jar basedir="bin" destfile="${buildPath}">
+			<manifest>
+				<attribute name="Built-By" value="Schmois" />
+			</manifest>
+		</jar>
+	</target>
+
+	<target name="build-jar">
+		<antcall target="compile-jar-classes" />
+		<antcall target="clean-jar" />
+		<antcall target="jar" />
+	</target>
+</project>
