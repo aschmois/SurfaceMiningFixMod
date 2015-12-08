@@ -47,13 +47,13 @@ af_vynora=false
 
 # Allow pickaxes made with iron to be enchanted. Default: false
 af_ironMaterial=false
-# Allow pickaxes made with steel to be enchanted. Default: false
+# Allow pickaxes made with steel to be enchanted. Default: true
 af_steelMaterial=true
-# Allow pickaxes made with seryll to be enchanted. Default: false
+# Allow pickaxes made with seryll to be enchanted. Default: true
 af_seryllMaterial=true
-# Allow pickaxes made with glimmersteel to be enchanted. Default: false
+# Allow pickaxes made with glimmersteel to be enchanted. Default: true
 af_glimmersteelMaterial=true
-# Allow pickaxes made with adamantine to be enchanted. Default: false
+# Allow pickaxes made with adamantine to be enchanted. Default: true
 af_adamantineMaterial=true
 
 # If true, the power of the spell will correlate to the chance you have to mine. At power 30 you'll have a 30% chance, at power 100 you'll have a 100% chance. Power 1-29 will have a value between 25-29. Default: true
