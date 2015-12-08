@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <project default="jar" name="SurfaceMiningFix">
 	<property name="buildDir" value="build/surfaceminingfix" />
-	<property name="version" value="0.1.1" />
+	<property name="version" value="0.1.2" />
 	<property name="jarName" value="surfaceminingfix-${version}.jar" />
 	<property name="buildPath" value="${buildDir}/${jarName}" />
 
@@ -11,6 +11,10 @@
 
 	<target name="build-brand" description="Adds version information to branding files.">
 		<propertyfile file="build/surfaceminingfix.properties">
+			<entry key="classname" value="com.schmois.wurmunlimited.mods.surfaceminingfix.SurfaceMiningFixMod" />
+			<entry key="classpath" value="${jarName}" />
+			<entry key="sharedClassLoader" value="true" />
+
 			<entry key="debug" default="false" />
 
 			<entry key="removeRockRestriction" default="false" />
@@ -23,6 +27,7 @@
 			<entry key="af_spellDifficulty" type="int" default="60" />
 			<entry key="af_spellCooldown" type="int" default="0" />
 
+			<entry key="af_all" default="false" />
 			<entry key="af_fo" default="false" />
 			<entry key="af_magranon" default="true" />
 			<entry key="af_vynora" default="false" />
@@ -35,9 +40,7 @@
 
 			<entry key="af_usePower" default="true" />
 
-			<entry key="classname" value="com.schmois.wurmunlimited.mods.surfaceminingfix.SurfaceMiningFixMod" />
-			<entry key="classpath" value="${jarName}" />
-			<entry key="sharedClassLoader" value="true" />
+			<entry key="af_allowWoA" default="false" />
 		</propertyfile>
 		<replaceregexp file="build/surfaceminingfix.properties" match="^#.*\n" replace="" />
 	</target>

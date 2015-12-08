@@ -16,6 +16,7 @@ public class Constants {
     public static int af_spellDifficulty = 60;
     public static long af_spellCooldown = 0L;
 
+    public static boolean af_all = false;
     public static boolean af_fo = false;
     public static boolean af_magranon = true;
     public static boolean af_vynora = false;
@@ -27,6 +28,8 @@ public class Constants {
     public static boolean af_adamantineMaterial = true;
 
     public static boolean af_usePower = true;
+    
+    public static boolean af_allowWoA = false;
 
     public static boolean getBoolean(Properties properties, String propertyName, boolean defaultValue) {
         String tmp = properties.getProperty(propertyName, Boolean.toString(defaultValue));

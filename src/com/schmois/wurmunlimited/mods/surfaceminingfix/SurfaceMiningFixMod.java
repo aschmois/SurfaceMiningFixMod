@@ -1,6 +1,8 @@
 package com.schmois.wurmunlimited.mods.surfaceminingfix;
 
+import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -9,6 +11,7 @@ import org.gotti.wurmunlimited.modloader.ReflectionUtil;
 import org.gotti.wurmunlimited.modloader.classhooks.CodeReplacer;
 import org.gotti.wurmunlimited.modloader.classhooks.HookException;
 import org.gotti.wurmunlimited.modloader.classhooks.HookManager;
+import org.gotti.wurmunlimited.modloader.classhooks.InvocationHandlerFactory;
 import org.gotti.wurmunlimited.modloader.classhooks.LocalNameLookup;
 import org.gotti.wurmunlimited.modloader.interfaces.Configurable;
 import org.gotti.wurmunlimited.modloader.interfaces.Initable;
@@ -20,8 +23,10 @@ import org.gotti.wurmunlimited.modsupport.actions.ModActions;
 import com.wurmonline.server.Server;
 import com.wurmonline.server.creatures.Creature;
 import com.wurmonline.server.deities.Deities;
+import com.wurmonline.server.deities.Deity;
 import com.wurmonline.server.items.Item;
 import com.wurmonline.server.spells.AzbantiumFistEnchant;
+import com.wurmonline.server.spells.Spell;
 import com.wurmonline.server.spells.SpellEffect;
 import com.wurmonline.server.spells.Spells;
 
@@ -60,14 +65,20 @@ public class SurfaceMiningFixMod implements WurmMod, Initable, PreInitable, Conf
                         throw new RuntimeException(e);
                     }
 
-                    if (Constants.af_fo)
-                        Deities.getDeity(Deities.DEITY_FO).addSpell(azbantiumPickaxe);
+                    if (Constants.af_all) {
+                        for (Deity deity : Deities.getDeities()) {
+                            deity.addSpell(azbantiumPickaxe);
+                        }
+                    } else {
+                        if (Constants.af_fo)
+                            Deities.getDeity(Deities.DEITY_FO).addSpell(azbantiumPickaxe);
 
-                    if (Constants.af_magranon)
-                        Deities.getDeity(Deities.DEITY_MAGRANON).addSpell(azbantiumPickaxe);
+                        if (Constants.af_magranon)
+                            Deities.getDeity(Deities.DEITY_MAGRANON).addSpell(azbantiumPickaxe);
 
-                    if (Constants.af_vynora)
-                        Deities.getDeity(Deities.DEITY_VYNORA).addSpell(azbantiumPickaxe);
+                        if (Constants.af_vynora)
+                            Deities.getDeity(Deities.DEITY_VYNORA).addSpell(azbantiumPickaxe);
+                    }
                 }
             }
         }.run();
@@ -91,6 +102,7 @@ public class SurfaceMiningFixMod implements WurmMod, Initable, PreInitable, Conf
         Constants.af_spellCooldown = Long
                 .valueOf(properties.getProperty("af_spellCooldown", Long.toString(Constants.af_spellCooldown)));
 
+        Constants.af_all = Constants.getBoolean(properties, "af_all", Constants.af_all);
         Constants.af_fo = Constants.getBoolean(properties, "af_fo", Constants.af_fo);
         Constants.af_magranon = Constants.getBoolean(properties, "af_magranon", Constants.af_magranon);
         Constants.af_vynora = Constants.getBoolean(properties, "af_vynora", Constants.af_vynora);
@@ -106,6 +118,8 @@ public class SurfaceMiningFixMod implements WurmMod, Initable, PreInitable, Conf
 
         Constants.af_usePower = Constants.getBoolean(properties, "af_usePower", Constants.af_usePower);
 
+        Constants.af_allowWoA = Constants.getBoolean(properties, "af_allowWoA", Constants.af_allowWoA);
+
         if (Constants.debug) {
             logger.log(Level.INFO, "debug: " + Constants.debug);
 
@@ -117,6 +131,7 @@ public class SurfaceMiningFixMod implements WurmMod, Initable, PreInitable, Conf
             logger.log(Level.INFO, "af_spellDifficulty: " + Constants.af_spellDifficulty);
             logger.log(Level.INFO, "af_spellCooldown: " + Constants.af_spellCooldown);
 
+            logger.log(Level.INFO, "af_all: " + Constants.af_all);
             logger.log(Level.INFO, "af_fo: " + Constants.af_fo);
             logger.log(Level.INFO, "af_magranon: " + Constants.af_magranon);
             logger.log(Level.INFO, "af_vynora: " + Constants.af_vynora);
@@ -128,6 +143,8 @@ public class SurfaceMiningFixMod implements WurmMod, Initable, PreInitable, Conf
             logger.log(Level.INFO, "af_adamantineMaterial: " + Constants.af_adamantineMaterial);
 
             logger.log(Level.INFO, "af_usePower: " + Constants.af_usePower);
+
+            logger.log(Level.INFO, "af_allowWoA: " + Constants.af_allowWoA);
         }
     }
 
@@ -147,6 +164,44 @@ public class SurfaceMiningFixMod implements WurmMod, Initable, PreInitable, Conf
 
     @Override
     public void init() {
+        if (!Constants.af_allowWoA) {
+            try {
+                ClassPool classPool = HookManager.getInstance().getClassPool();
+                CtClass[] paramTypes = { classPool.get("com.wurmonline.server.skills.Skill"),
+                        classPool.get("com.wurmonline.server.creatures.Creature"),
+                        classPool.get("com.wurmonline.server.items.Item") };
+                HookManager.getInstance().registerHook("com.wurmonline.server.spells.WindOfAges", "precondition",
+                        Descriptor.ofMethod(CtPrimitiveType.booleanType, paramTypes), new InvocationHandlerFactory() {
+
+                            @Override
+                            public InvocationHandler createInvocationHandler() {
+                                return new InvocationHandler() {
+
+                                    @Override
+                                    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                                        Object precondition = method.invoke(proxy, args);
+                                        if (precondition instanceof Boolean && proxy instanceof Spell) {
+                                            if (!(boolean) precondition) {
+                                                return false;
+                                            }
+                                            Creature performer = (Creature) args[1];
+                                            Item target = (Item) args[2];
+                                            if (target.getSpellEffect(Constants.af_enchantmentId) != null) {
+                                                performer.getCommunicator().sendNormalServerMessage("The "
+                                                        + target.getName()
+                                                        + " is already enchanted with something that would negate the effect.");
+                                                return false;
+                                            }
+                                        }
+                                        return precondition;
+                                    }
+                                };
+                            }
+                        });
+            } catch (NotFoundException e) {
+                logger.log(Level.INFO, "Broken hook, let dev know", e);
+            }
+        }
     }
 
     public static boolean willMineSlope(Creature performer, Item source) {
@@ -161,9 +216,12 @@ public class SurfaceMiningFixMod implements WurmMod, Initable, PreInitable, Conf
             float power = se.getPower();
             float chance = power < 30 ? 25 + power / 5 : power;
             if (Constants.debug) {
-                logger.log(Level.INFO, "Chance of rock mining: " + chance);
+                logger.log(Level.INFO, "Chance of rock mining: " + chance + "%");
             }
             return Server.rand.nextFloat() <= chance / 100;
+        }
+        if (Constants.debug) {
+            logger.log(Level.INFO, "Chance of rock mining: 25%");
         }
         return Server.rand.nextInt(5) == 0;
     }
@@ -176,11 +234,9 @@ public class SurfaceMiningFixMod implements WurmMod, Initable, PreInitable, Conf
         CtClass ctCreature = classPool.get("com.wurmonline.server.creatures.Creature");
         CtClass ctItem = classPool.get("com.wurmonline.server.items.Item");
 
-        CtClass[] paramTypes = { classPool.get("com.wurmonline.server.behaviours.Action"),
-                classPool.get("com.wurmonline.server.creatures.Creature"),
-                classPool.get("com.wurmonline.server.items.Item"), CtPrimitiveType.intType, CtPrimitiveType.intType,
-                CtPrimitiveType.booleanType, CtPrimitiveType.intType, CtPrimitiveType.intType,
-                CtPrimitiveType.shortType, CtPrimitiveType.floatType };
+        CtClass[] paramTypes = { classPool.get("com.wurmonline.server.behaviours.Action"), ctCreature, ctItem,
+                CtPrimitiveType.intType, CtPrimitiveType.intType, CtPrimitiveType.booleanType, CtPrimitiveType.intType,
+                CtPrimitiveType.intType, CtPrimitiveType.shortType, CtPrimitiveType.floatType };
 
         CtMethod method = ctTileRockBehaviour.getMethod("action",
                 Descriptor.ofMethod(CtPrimitiveType.booleanType, paramTypes));
