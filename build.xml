@@ -1,23 +1,46 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <project default="jar" name="SurfaceMiningFix">
 	<property name="buildDir" value="build/surfaceminingfix" />
-	<property name="version" value="0.1" />
+	<property name="version" value="0.1.1" />
 	<property name="jarName" value="surfaceminingfix-${version}.jar" />
 	<property name="buildPath" value="${buildDir}/${jarName}" />
-	<propertyfile file="build/surfaceminingfix.properties">
-		<entry key="classname" value="com.schmois.wurmunlimited.mods.surfaceminingfix.SurfaceMiningFixMod" />
-		<entry key="classpath" value="${jarName}" />
-		<entry key="sharedClassLoader" value="true" />
-		<entry key="addSpell" default="true" />
-		<entry key="spellCost" type="int" default="50" />
-		<entry key="spellDifficulty" type="int" default="60" />
-		<entry key="spellCooldown" type="int" default="0" />
-		
-		<entry key="debug" default="false" />
-	</propertyfile>
+
 	<path id="jar-project-classpath">
 		<fileset dir="lib" includes="*.jar" />
 	</path>
+
+	<target name="build-brand" description="Adds version information to branding files.">
+		<propertyfile file="build/surfaceminingfix.properties">
+			<entry key="debug" default="false" />
+
+			<entry key="removeRockRestriction" default="false" />
+
+			<entry key="addAzbantiumFistEnchantment" default="true" />
+
+			<entry key="af_enchantmentId" type="int" default="34" />
+
+			<entry key="af_spellCost" type="int" default="50" />
+			<entry key="af_spellDifficulty" type="int" default="60" />
+			<entry key="af_spellCooldown" type="int" default="0" />
+
+			<entry key="af_fo" default="false" />
+			<entry key="af_magranon" default="true" />
+			<entry key="af_vynora" default="false" />
+
+			<entry key="af_ironMaterial" default="false" />
+			<entry key="af_steelMaterial" default="true" />
+			<entry key="af_seryllMaterial" default="true" />
+			<entry key="af_glimmersteelMaterial" default="true" />
+			<entry key="af_adamantineMaterial" default="true" />
+
+			<entry key="af_usePower" default="true" />
+
+			<entry key="classname" value="com.schmois.wurmunlimited.mods.surfaceminingfix.SurfaceMiningFixMod" />
+			<entry key="classpath" value="${jarName}" />
+			<entry key="sharedClassLoader" value="true" />
+		</propertyfile>
+		<replaceregexp file="build/surfaceminingfix.properties" match="^#.*\n" replace="" />
+	</target>
 
 	<target name="clean">
 		<delete dir="bin" />
@@ -34,9 +57,8 @@
 		<javac verbose="false" srcdir="src" destdir="bin" debug="true" includes="**/*.java" classpathref="jar-project-classpath" />
 	</target>
 	<target name="clean-jar">
-		<delete dir="${buildPath}" />
+		<delete dir="${buildDir}" />
 		<mkdir dir="${buildDir}" />
-
 	</target>
 
 	<target name="jar">
@@ -48,6 +70,7 @@
 	</target>
 
 	<target name="build-jar">
+		<antcall target="build-brand" />
 		<antcall target="compile-jar-classes" />
 		<antcall target="clean-jar" />
 		<antcall target="jar" />

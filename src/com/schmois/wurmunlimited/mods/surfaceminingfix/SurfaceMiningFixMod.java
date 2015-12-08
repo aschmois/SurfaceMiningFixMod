@@ -39,12 +39,6 @@ import javassist.bytecode.MethodInfo;
 
 public class SurfaceMiningFixMod implements WurmMod, Initable, PreInitable, Configurable, ServerStartedListener {
 
-    private boolean addSpell = true;
-    // private boolean addItem = false;
-    private static boolean debug = false;
-    private int spellCost = 50;
-    private int spellDifficulty = 60;
-    private long spellCooldown = 0L;
     private static final Logger logger = Logger.getLogger(SurfaceMiningFixMod.class.getName());
 
     @Override
@@ -52,11 +46,11 @@ public class SurfaceMiningFixMod implements WurmMod, Initable, PreInitable, Conf
         new Runnable() {
             @Override
             public void run() {
-                if (addSpell) {
+                if (Constants.addAzbantiumFistEnchantment) {
                     logger.log(Level.INFO, "Registering AzbantiumFist enchant");
 
-                    AzbantiumFistEnchant azbantiumPickaxe = new AzbantiumFistEnchant(spellCost, spellDifficulty,
-                            spellCooldown);
+                    AzbantiumFistEnchant azbantiumPickaxe = new AzbantiumFistEnchant(Constants.af_spellCost,
+                            Constants.af_spellDifficulty, Constants.af_spellCooldown);
 
                     try {
                         ReflectionUtil.callPrivateMethod(Spells.class,
@@ -66,7 +60,14 @@ public class SurfaceMiningFixMod implements WurmMod, Initable, PreInitable, Conf
                         throw new RuntimeException(e);
                     }
 
-                    Deities.getDeity(Deities.DEITY_MAGRANON).addSpell(azbantiumPickaxe);
+                    if (Constants.af_fo)
+                        Deities.getDeity(Deities.DEITY_FO).addSpell(azbantiumPickaxe);
+
+                    if (Constants.af_magranon)
+                        Deities.getDeity(Deities.DEITY_MAGRANON).addSpell(azbantiumPickaxe);
+
+                    if (Constants.af_vynora)
+                        Deities.getDeity(Deities.DEITY_VYNORA).addSpell(azbantiumPickaxe);
                 }
             }
         }.run();
@@ -75,25 +76,58 @@ public class SurfaceMiningFixMod implements WurmMod, Initable, PreInitable, Conf
 
     @Override
     public void configure(Properties properties) {
-        String spell = properties.getProperty("addSpell", Boolean.toString(addSpell));
-        // TODO: String item = properties.getProperty("addItem", Boolean.toString(addItem));
-        String debugValue = properties.getProperty("debug", Boolean.toString(debug));
-        addSpell = spell.equalsIgnoreCase("true") || spell.equalsIgnoreCase("yes") || spell.equalsIgnoreCase("1");
-        // TODO: addItem = item.equalsIgnoreCase("true") || item.equalsIgnoreCase("yes") || item.equalsIgnoreCase("1");
-        spellCost = Integer.valueOf(properties.getProperty("spellCost", Integer.toString(spellCost)));
-        spellDifficulty = Integer.valueOf(properties.getProperty("spellDifficulty", Integer.toString(spellDifficulty)));
-        spellCooldown = Long.valueOf(properties.getProperty("spellCooldown", Long.toString(spellCooldown)));
+        Constants.debug = Constants.getBoolean(properties, "debug", Constants.debug);
 
-        debug = debugValue.equalsIgnoreCase("true") || debugValue.equalsIgnoreCase("yes")
-                || debugValue.equalsIgnoreCase("1");
+        Constants.addAzbantiumFistEnchantment = Constants.getBoolean(properties, "addAzbantiumFistEnchantment",
+                Constants.addAzbantiumFistEnchantment);
 
-        if (debug) {
-            logger.log(Level.INFO, "addSpell: " + addSpell);
-            // TODO: logger.log(Level.INFO, "addItem: " + addItem);
-            logger.log(Level.INFO, "spellCost: " + spellCost);
-            logger.log(Level.INFO, "spellDifficulty: " + spellDifficulty);
-            logger.log(Level.INFO, "spellCooldown: " + spellCooldown);
-            logger.log(Level.INFO, "debug: " + debug);
+        Constants.af_enchantmentId = Byte
+                .valueOf(properties.getProperty("af_enchantmentId", Byte.toString(Constants.af_enchantmentId)));
+
+        Constants.af_spellCost = Integer
+                .valueOf(properties.getProperty("af_spellCost", Integer.toString(Constants.af_spellCost)));
+        Constants.af_spellDifficulty = Integer
+                .valueOf(properties.getProperty("af_spellDifficulty", Integer.toString(Constants.af_spellDifficulty)));
+        Constants.af_spellCooldown = Long
+                .valueOf(properties.getProperty("af_spellCooldown", Long.toString(Constants.af_spellCooldown)));
+
+        Constants.af_fo = Constants.getBoolean(properties, "af_fo", Constants.af_fo);
+        Constants.af_magranon = Constants.getBoolean(properties, "af_magranon", Constants.af_magranon);
+        Constants.af_vynora = Constants.getBoolean(properties, "af_vynora", Constants.af_vynora);
+
+        Constants.af_ironMaterial = Constants.getBoolean(properties, "af_ironMaterial", Constants.af_ironMaterial);
+        Constants.af_steelMaterial = Constants.getBoolean(properties, "af_steelMaterial", Constants.af_steelMaterial);
+        Constants.af_seryllMaterial = Constants.getBoolean(properties, "af_seryllMaterial",
+                Constants.af_seryllMaterial);
+        Constants.af_glimmersteelMaterial = Constants.getBoolean(properties, "af_glimmersteelMaterial",
+                Constants.af_glimmersteelMaterial);
+        Constants.af_adamantineMaterial = Constants.getBoolean(properties, "af_adamantineMaterial",
+                Constants.af_adamantineMaterial);
+
+        Constants.af_usePower = Constants.getBoolean(properties, "af_usePower", Constants.af_usePower);
+
+        if (Constants.debug) {
+            logger.log(Level.INFO, "debug: " + Constants.debug);
+
+            logger.log(Level.INFO, "addAzbantiumFistEnchantment: " + Constants.addAzbantiumFistEnchantment);
+
+            logger.log(Level.INFO, "af_enchantmentId: " + Constants.af_enchantmentId);
+
+            logger.log(Level.INFO, "af_spellCost: " + Constants.af_spellCost);
+            logger.log(Level.INFO, "af_spellDifficulty: " + Constants.af_spellDifficulty);
+            logger.log(Level.INFO, "af_spellCooldown: " + Constants.af_spellCooldown);
+
+            logger.log(Level.INFO, "af_fo: " + Constants.af_fo);
+            logger.log(Level.INFO, "af_magranon: " + Constants.af_magranon);
+            logger.log(Level.INFO, "af_vynora: " + Constants.af_vynora);
+
+            logger.log(Level.INFO, "af_ironMaterial: " + Constants.af_ironMaterial);
+            logger.log(Level.INFO, "af_steelMaterial: " + Constants.af_steelMaterial);
+            logger.log(Level.INFO, "af_seryllMaterial: " + Constants.af_seryllMaterial);
+            logger.log(Level.INFO, "af_glimmersteelMaterial: " + Constants.af_glimmersteelMaterial);
+            logger.log(Level.INFO, "af_adamantineMaterial: " + Constants.af_adamantineMaterial);
+
+            logger.log(Level.INFO, "af_usePower: " + Constants.af_usePower);
         }
     }
 
@@ -116,11 +150,17 @@ public class SurfaceMiningFixMod implements WurmMod, Initable, PreInitable, Conf
     }
 
     public static boolean willMineSlope(Creature performer, Item source) {
-        SpellEffect se = source.getSpellEffect(AzbantiumFistEnchant.BUFF_AZBANTIUM_FIST);
+        if (Constants.removeRockRestriction) {
+            return true;
+        }
+        SpellEffect se = source.getSpellEffect(Constants.af_enchantmentId);
         if (se != null) {
+            if (!Constants.af_usePower) {
+                return true;
+            }
             float power = se.getPower();
             float chance = power < 30 ? 25 + power / 5 : power;
-            if (debug) {
+            if (Constants.debug) {
                 logger.log(Level.INFO, "Chance of rock mining: " + chance);
             }
             return Server.rand.nextFloat() <= chance / 100;
