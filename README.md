@@ -3,6 +3,7 @@
 ### Features:
 - Azbantium Fist enchantment that allows faster rock mining dependant on power.
 - Spell configuration
+- Ago's Mod Loader required
 
 ### Information
 
@@ -37,3 +38,6 @@ sharedClassLoader=true
 - Enchantment to be able to mine deeper underwater or a dredge-like item but for rock
 - Limit enchantment so that it's the only one that is allowed
   - Implemented: If the pickaxe already has WoA you won't be able to enchant, this is not the case the other way around; needs expansion.
+  - 
+
+Thanks ago for all your help and your great mod loader.
