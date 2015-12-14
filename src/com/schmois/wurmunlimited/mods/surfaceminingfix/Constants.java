@@ -20,6 +20,7 @@ public class Constants {
     public static boolean af_fo = false;
     public static boolean af_magranon = true;
     public static boolean af_vynora = false;
+    public static boolean af_libila = false;
 
     public static boolean af_ironMaterial = false;
     public static boolean af_steelMaterial = true;
