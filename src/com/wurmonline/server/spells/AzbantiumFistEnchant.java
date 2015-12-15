@@ -1,7 +1,5 @@
 package com.wurmonline.server.spells;
 
-import java.io.IOException;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.gotti.wurmunlimited.modsupport.actions.ModActions;
@@ -16,8 +14,6 @@ import com.wurmonline.server.items.Materials;
 import com.wurmonline.server.skills.Skill;
 
 public class AzbantiumFistEnchant extends ReligiousSpell {
-
-    private static Logger logger = Logger.getLogger(AzbantiumFistEnchant.class.getName());
 
     public AzbantiumFistEnchant(int cost, int difficulty, long cooldown) {
         super("Azbantium Fist", ModActions.getNextActionId(), 20, cost, difficulty, 30, cooldown);
@@ -115,24 +111,18 @@ public class AzbantiumFistEnchant extends ReligiousSpell {
         SpellEffect eff = target.getSpellEffect(this.enchantment);
         if (!Constants.af_usePower) {
             if (eff != null) {
-                returnFavor(performer);
+                performer.getCommunicator()
+                        .sendNormalServerMessage(this.name + " is already maxed out, don't waste your favor!");
                 return true;
             }
         } else {
-            if (eff != null && eff.getPower() == 100.0F) {
-                returnFavor(performer);
+            if (eff != null && eff.getPower() >= 100.0F) {
+                performer.getCommunicator()
+                        .sendNormalServerMessage(this.name + " is already maxed out, don't waste your favor!");
                 return true;
             }
         }
         return false;
     }
 
-    private void returnFavor(Creature performer) {
-        try {
-            performer.setFavor(performer.getFavor() + (float) this.cost);
-        } catch (IOException e) {
-            logger.log(Level.WARNING, "Programming error", e);
-        }
-        performer.getCommunicator().sendNormalServerMessage(this.name + " is already maxed out.");
-    }
 }
