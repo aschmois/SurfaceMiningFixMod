@@ -23,7 +23,6 @@ import org.gotti.wurmunlimited.modsupport.actions.ModActions;
 
 import com.schmois.wurmunlimited.mods.surfaceminingfix.items.AzbantiumPickaxe;
 import com.wurmonline.server.Server;
-import com.wurmonline.server.behaviours.Actions;
 import com.wurmonline.server.creatures.Creature;
 import com.wurmonline.server.deities.Deities;
 import com.wurmonline.server.deities.Deity;
@@ -288,35 +287,32 @@ public class SurfaceMiningFixMod
         }
     }
 
-    public static boolean willMineSlope(Creature performer, Item source, short action) {
-        if (Actions.isActionMineSurface(action)) {
-            if (Constants.alwaysLowerRockSlope) {
+    public static boolean willMineSlope(Creature performer, Item source) {
+        if (Constants.alwaysLowerRockSlope) {
+            return true;
+        }
+        float power = 0.0F;
+
+        if (Constants.addAzbantiumPickaxeItem && source.getTemplateId() == Constants.ap_id) {
+            if (!Constants.ap_useQuality) {
                 return true;
             }
-            float power = 0.0F;
-
-            if (Constants.addAzbantiumPickaxeItem && source.getTemplateId() == Constants.ap_id) {
-                if (!Constants.ap_useQuality) {
-                    return true;
-                }
-                power = source.getQualityLevel();
-                if (Constants.debug) {
-                    logger.log(Level.INFO, "Azbantium Pickaxe: " + power + "QL");
-                }
+            power = source.getQualityLevel();
+            if (Constants.debug) {
+                logger.log(Level.INFO, "Azbantium Pickaxe: " + power + "QL");
             }
-            SpellEffect se = source.getSpellEffect(Constants.af_enchantmentId);
-            if (se != null) {
-                if (!Constants.af_usePower) {
-                    return true;
-                }
-                power = se.getPower();
-                if (Constants.debug) {
-                    logger.log(Level.INFO, "Azbantium Fist: " + power + " power");
-                }
-            }
-            return Server.rand.nextFloat() <= getChance(power) / 100;
         }
-        return Server.rand.nextInt(5) == 0;
+        SpellEffect se = source.getSpellEffect(Constants.af_enchantmentId);
+        if (se != null) {
+            if (!Constants.af_usePower) {
+                return true;
+            }
+            power = se.getPower();
+            if (Constants.debug) {
+                logger.log(Level.INFO, "Azbantium Fist: " + power + " power");
+            }
+        }
+        return Server.rand.nextFloat() <= getChance(power) / 100;
     }
 
     private static float getChance(float power) {
@@ -334,10 +330,11 @@ public class SurfaceMiningFixMod
         CtClass ctServer = classPool.get("com.wurmonline.server.Server");
         CtClass ctCreature = classPool.get("com.wurmonline.server.creatures.Creature");
         CtClass ctItem = classPool.get("com.wurmonline.server.items.Item");
+        CtClass ctAction = classPool.get("com.wurmonline.server.behaviours.Action");
 
-        CtClass[] paramTypes = { classPool.get("com.wurmonline.server.behaviours.Action"), ctCreature, ctItem,
-                CtPrimitiveType.intType, CtPrimitiveType.intType, CtPrimitiveType.booleanType, CtPrimitiveType.intType,
-                CtPrimitiveType.intType, CtPrimitiveType.shortType, CtPrimitiveType.floatType };
+        CtClass[] paramTypes = { ctAction, ctCreature, ctItem, CtPrimitiveType.intType, CtPrimitiveType.intType,
+                CtPrimitiveType.booleanType, CtPrimitiveType.intType, CtPrimitiveType.intType,
+                CtPrimitiveType.shortType, CtPrimitiveType.floatType };
 
         CtMethod method = ctTileRockBehaviour.getMethod("action",
                 Descriptor.ofMethod(CtPrimitiveType.booleanType, paramTypes));
@@ -356,15 +353,18 @@ public class SurfaceMiningFixMod
         bytecode.add(Bytecode.IFNE);
         byte[] search = bytecode.get();
 
+        logger.log(Level.INFO, "Bytecode length: " + search.length);
+
         bytecode = new Bytecode(methodInfo.getConstPool());
         bytecode.addAload(localNames.get("performer"));
         bytecode.addAload(localNames.get("source"));
-        bytecode.addAload(localNames.get("action"));
-        bytecode.addInvokestatic(classPool.get(this.getClass().getName()), "willMineSlope", Descriptor.ofMethod(
-                CtPrimitiveType.booleanType, new CtClass[] { ctCreature, ctItem, CtPrimitiveType.shortType }));
-        bytecode.addGap(1);
+        bytecode.addInvokestatic(classPool.get(this.getClass().getName()), "willMineSlope",
+                Descriptor.ofMethod(CtPrimitiveType.booleanType, new CtClass[] { ctCreature, ctItem }));
+        bytecode.addGap(2);
         bytecode.add(Bytecode.IFEQ);
         byte[] replacement = bytecode.get();
+
+        logger.log(Level.INFO, "Bytecode replacement length: " + replacement.length);
 
         new CodeReplacer(codeAttribute).replaceCode(search, replacement);
         methodInfo.rebuildStackMap(classPool);
