@@ -32,6 +32,7 @@ public class Constants {
     public static boolean af_usePower = true;
 
     public static boolean af_allowWoA = false;
+    public static boolean af_allowBotD = false;
 
     // Azbantium Pickaxe Item
     public static boolean addAzbantiumPickaxeItem = false;

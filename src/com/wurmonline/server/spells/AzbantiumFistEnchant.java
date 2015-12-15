@@ -54,7 +54,8 @@ public class AzbantiumFistEnchant extends ReligiousSpell {
             performer.getCommunicator().sendNormalServerMessage("The spell will not work on that.");
             return false;
         }
-        if (!Constants.af_allowWoA && target.getSpellEffect((byte) 16) != null) {
+        if ((!Constants.af_allowWoA && target.getSpellEffect(BUFF_WIND_OF_AGES) != null)
+                || (!Constants.af_allowBotD && target.getSpellEffect(BUFF_BLESSINGDARK) != null)) {
             performer.getCommunicator().sendNormalServerMessage(
                     "The " + target.getName() + " is already enchanted with something that would negate the effect.");
             return false;

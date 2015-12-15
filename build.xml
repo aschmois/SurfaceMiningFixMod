@@ -44,6 +44,7 @@
 			<entry key="af_usePower" default="true" />
 
 			<entry key="af_allowWoA" default="false" />
+			<entry key="af_allowBotD" default="false" />
 
 			<!-- Azbantium Pickaxe Item -->
 			<entry key="addAzbantiumPickaxeItem" default="false" />

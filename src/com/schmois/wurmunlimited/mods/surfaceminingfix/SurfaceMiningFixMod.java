@@ -232,42 +232,58 @@ public class SurfaceMiningFixMod
 
     @Override
     public void init() {
-        if (!Constants.af_allowWoA) {
-            try {
-                ClassPool classPool = HookManager.getInstance().getClassPool();
-                CtClass[] paramTypes = { classPool.get("com.wurmonline.server.skills.Skill"),
-                        classPool.get("com.wurmonline.server.creatures.Creature"),
-                        classPool.get("com.wurmonline.server.items.Item") };
-                HookManager.getInstance().registerHook("com.wurmonline.server.spells.WindOfAges", "precondition",
-                        Descriptor.ofMethod(CtPrimitiveType.booleanType, paramTypes), new InvocationHandlerFactory() {
-
-                            @Override
-                            public InvocationHandler createInvocationHandler() {
-                                return new InvocationHandler() {
-
-                                    @Override
-                                    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-                                        Object precondition = method.invoke(proxy, args);
-                                        if (precondition instanceof Boolean && proxy instanceof Spell) {
-                                            if (!(boolean) precondition) {
-                                                return false;
-                                            }
-                                            Creature performer = (Creature) args[1];
-                                            Item target = (Item) args[2];
-                                            if (target.getSpellEffect(Constants.af_enchantmentId) != null) {
-                                                performer.getCommunicator().sendNormalServerMessage("The "
-                                                        + target.getName()
-                                                        + " is already enchanted with something that would negate the effect.");
-                                                return false;
-                                            }
-                                        }
-                                        return precondition;
-                                    }
-                                };
+        if (!Constants.af_allowWoA || !Constants.af_allowBotD) {
+            InvocationHandlerFactory spellCheck = new InvocationHandlerFactory() {
+                @Override
+                public InvocationHandler createInvocationHandler() {
+                    return new InvocationHandler() {
+                        @Override
+                        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                            Object precondition = method.invoke(proxy, args);
+                            if (precondition instanceof Boolean && proxy instanceof Spell) {
+                                if (!(boolean) precondition) {
+                                    return false;
+                                }
+                                Creature performer = (Creature) args[1];
+                                Item target = (Item) args[2];
+                                if (target.getSpellEffect(Constants.af_enchantmentId) != null) {
+                                    performer.getCommunicator().sendNormalServerMessage("The " + target.getName()
+                                            + " is already enchanted with something that would negate the effect.");
+                                    return false;
+                                }
                             }
-                        });
-            } catch (NotFoundException e) {
-                logger.log(Level.INFO, "Broken Wind of Ages hook, let dev know", e);
+                            return precondition;
+                        }
+                    };
+                }
+            };
+
+            if (!Constants.af_allowWoA) {
+                try {
+
+                    ClassPool classPool = HookManager.getInstance().getClassPool();
+                    CtClass[] paramTypes = { classPool.get("com.wurmonline.server.skills.Skill"),
+                            classPool.get("com.wurmonline.server.creatures.Creature"),
+                            classPool.get("com.wurmonline.server.items.Item") };
+                    HookManager.getInstance().registerHook("com.wurmonline.server.spells.WindOfAges", "precondition",
+                            Descriptor.ofMethod(CtPrimitiveType.booleanType, paramTypes), spellCheck);
+                } catch (NotFoundException e) {
+                    logger.log(Level.INFO, "Broken Wind of Ages hook, let dev know", e);
+                }
+            }
+
+            if (!Constants.af_allowBotD) {
+                try {
+
+                    ClassPool classPool = HookManager.getInstance().getClassPool();
+                    CtClass[] paramTypes = { classPool.get("com.wurmonline.server.skills.Skill"),
+                            classPool.get("com.wurmonline.server.creatures.Creature"),
+                            classPool.get("com.wurmonline.server.items.Item") };
+                    HookManager.getInstance().registerHook("com.wurmonline.server.spells.BlessingDark", "precondition",
+                            Descriptor.ofMethod(CtPrimitiveType.booleanType, paramTypes), spellCheck);
+                } catch (NotFoundException e) {
+                    logger.log(Level.INFO, "Broken Blessing of the Dark hook, let dev know", e);
+                }
             }
         }
     }
