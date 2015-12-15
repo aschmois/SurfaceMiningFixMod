@@ -9,7 +9,6 @@ import org.gotti.wurmunlimited.modsupport.ItemTemplateBuilder;
 import com.schmois.wurmunlimited.mods.surfaceminingfix.Constants;
 import com.wurmonline.server.MiscConstants;
 import com.wurmonline.server.items.CreationCategories;
-import com.wurmonline.server.items.CreationEntry;
 import com.wurmonline.server.items.CreationEntryCreator;
 import com.wurmonline.server.items.ItemList;
 import com.wurmonline.server.items.ItemTemplate;

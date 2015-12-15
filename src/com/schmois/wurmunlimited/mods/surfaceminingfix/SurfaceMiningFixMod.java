@@ -81,6 +81,9 @@ public class SurfaceMiningFixMod
 
                         if (Constants.af_vynora)
                             Deities.getDeity(Deities.DEITY_VYNORA).addSpell(azbantiumPickaxe);
+
+                        if (Constants.af_libila)
+                            Deities.getDeity(Deities.DEITY_LIBILA).addSpell(azbantiumPickaxe);
                     }
                 }
             }

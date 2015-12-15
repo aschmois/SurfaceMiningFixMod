@@ -32,6 +32,7 @@
 			<entry key="af_fo" default="false" />
 			<entry key="af_magranon" default="true" />
 			<entry key="af_vynora" default="false" />
+			<entry key="af_libila" default="false" />
 
 			<entry key="af_ironMaterial" default="false" />
 			<entry key="af_steelMaterial" default="true" />
