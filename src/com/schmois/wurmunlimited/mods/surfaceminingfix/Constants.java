@@ -5,7 +5,8 @@ import java.util.Properties;
 public class Constants {
     public static boolean debug = false;
 
-    public static boolean removeRockRestriction = false;
+    public static boolean alwaysLowerRockSlope = false;
+    public static boolean noNeedToUnconverRock = false;
 
     // Azbantium Fist Enchantment
     public static boolean addAzbantiumFistEnchantment = true;
@@ -51,7 +52,7 @@ public class Constants {
     public static int smr_weight = 15000;
 
     public static int smr_id;
-
+    
     public static boolean getBoolean(Properties properties, String propertyName, boolean defaultValue) {
         String tmp = properties.getProperty(propertyName, Boolean.toString(defaultValue));
         return tmp.equalsIgnoreCase("true") || tmp.equalsIgnoreCase("yes") || tmp.equalsIgnoreCase("1");

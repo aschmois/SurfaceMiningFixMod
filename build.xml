@@ -17,7 +17,8 @@
 
 			<entry key="debug" default="false" />
 
-			<entry key="removeRockRestriction" default="false" />
+			<entry key="alwaysLowerRockSlope" default="false" />
+			<entry key="noNeedToUnconverRock" default="false" />
 
 			<!-- Azbantium Fist Echantment -->
 			<entry key="addAzbantiumFistEnchantment" default="true" />

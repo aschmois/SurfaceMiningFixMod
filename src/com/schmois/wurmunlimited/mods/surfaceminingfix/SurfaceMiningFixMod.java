@@ -181,14 +181,24 @@ public class SurfaceMiningFixMod
     @Override
     public void preInit() {
         ModActions.init();
-        try {
-            /**
-             * The condition for checking if it mined a slope or not is repeated so we need to run the following code twice, it's really dumb.
-             */
-            replaceMineSlopeCondition();
-            replaceMineSlopeCondition(); // Stupid Rolf code
-        } catch (NotFoundException | BadBytecode e) {
-            throw new HookException(e);
+        if (Constants.alwaysLowerRockSlope || Constants.addAzbantiumFistEnchantment
+                || Constants.addSeafloorMiningRigItem) {
+            try {
+                /**
+                 * The condition for checking if it mined a slope or not is repeated so we need to run the following code twice, it's really dumb.
+                 */
+                replaceMineSlopeCondition();
+                replaceMineSlopeCondition(); // Stupid Rolf code
+            } catch (NotFoundException | BadBytecode e) {
+                throw new HookException(e);
+            }
+        }
+        if (Constants.noNeedToUnconverRock) {
+            try {
+                replaceSurroundingRockCondition();
+            } catch (NotFoundException | BadBytecode e) {
+                throw new HookException(e);
+            }
         }
     }
 
@@ -235,7 +245,7 @@ public class SurfaceMiningFixMod
     }
 
     public static boolean willMineSlope(Creature performer, Item source) {
-        if (Constants.removeRockRestriction) {
+        if (Constants.alwaysLowerRockSlope) {
             return true;
         }
         float power = 0.0F;
@@ -306,6 +316,60 @@ public class SurfaceMiningFixMod
                 Descriptor.ofMethod(CtPrimitiveType.booleanType, new CtClass[] { ctCreature, ctItem }));
         bytecode.addGap(2);
         bytecode.add(Bytecode.IFEQ);
+        byte[] replacement = bytecode.get();
+
+        new CodeReplacer(codeAttribute).replaceCode(search, replacement);
+        methodInfo.rebuildStackMap(classPool);
+    }
+
+    /*
+    @formatter:off
+         L766
+        1665 aload_2;              performer 
+        1666 invokevirtual 272;    com.wurmonline.server.creatures.Communicator getCommunicator() 
+         L767 
+        1669 ldc_w 916;            "The surrounding area needs to be rock before you mine." 
+         L766 
+        1672 invokevirtual 278;    void sendNormalServerMessage(java.lang.String performer) 
+         L768 
+        1675 iconst_1;
+        1676 ireturn;
+    @formatter:on
+    */
+    private void replaceSurroundingRockCondition() throws NotFoundException, BadBytecode {
+        ClassPool classPool = HookManager.getInstance().getClassPool();
+        CtClass ctString = classPool.get("java.lang.String");
+        CtClass ctTileRockBehaviour = classPool.get("com.wurmonline.server.behaviours.TileRockBehaviour");
+        CtClass ctCreature = classPool.get("com.wurmonline.server.creatures.Creature");
+        CtClass ctItem = classPool.get("com.wurmonline.server.items.Item");
+        CtClass ctCommunicator = classPool.get("com.wurmonline.server.creatures.Communicator");
+
+        CtClass[] paramTypes = { classPool.get("com.wurmonline.server.behaviours.Action"), ctCreature, ctItem,
+                CtPrimitiveType.intType, CtPrimitiveType.intType, CtPrimitiveType.booleanType, CtPrimitiveType.intType,
+                CtPrimitiveType.intType, CtPrimitiveType.shortType, CtPrimitiveType.floatType };
+
+        CtMethod method = ctTileRockBehaviour.getMethod("action",
+                Descriptor.ofMethod(CtPrimitiveType.booleanType, paramTypes));
+
+        MethodInfo methodInfo = method.getMethodInfo();
+        CodeAttribute codeAttribute = methodInfo.getCodeAttribute();
+
+        Bytecode bytecode = new Bytecode(methodInfo.getConstPool());
+        bytecode.addAload(2);
+        bytecode.addInvokevirtual(ctCreature, "getCommunicator", ctCommunicator, new CtClass[] {});
+
+        bytecode.addLdc("The surrounding area needs to be rock before you mine.");
+
+        bytecode.addInvokevirtual(ctCommunicator, "sendNormalServerMessage", CtPrimitiveType.voidType,
+                new CtClass[] { ctString });
+
+        bytecode.addIconst(1);
+        bytecode.add(Bytecode.IRETURN);
+
+        byte[] search = bytecode.get();
+
+        bytecode = new Bytecode(methodInfo.getConstPool());
+        bytecode.addGap(search.length);
         byte[] replacement = bytecode.get();
 
         new CodeReplacer(codeAttribute).replaceCode(search, replacement);
