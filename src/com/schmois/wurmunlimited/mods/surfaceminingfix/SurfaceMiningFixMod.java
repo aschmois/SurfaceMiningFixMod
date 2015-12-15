@@ -15,11 +15,13 @@ import org.gotti.wurmunlimited.modloader.classhooks.InvocationHandlerFactory;
 import org.gotti.wurmunlimited.modloader.classhooks.LocalNameLookup;
 import org.gotti.wurmunlimited.modloader.interfaces.Configurable;
 import org.gotti.wurmunlimited.modloader.interfaces.Initable;
+import org.gotti.wurmunlimited.modloader.interfaces.ItemTemplatesCreatedListener;
 import org.gotti.wurmunlimited.modloader.interfaces.PreInitable;
 import org.gotti.wurmunlimited.modloader.interfaces.ServerStartedListener;
 import org.gotti.wurmunlimited.modloader.interfaces.WurmMod;
 import org.gotti.wurmunlimited.modsupport.actions.ModActions;
 
+import com.schmois.wurmunlimited.mods.surfaceminingfix.items.AzbantiumPickaxe;
 import com.wurmonline.server.Server;
 import com.wurmonline.server.creatures.Creature;
 import com.wurmonline.server.deities.Deities;
@@ -42,7 +44,8 @@ import javassist.bytecode.Descriptor;
 import javassist.bytecode.LocalVariableAttribute;
 import javassist.bytecode.MethodInfo;
 
-public class SurfaceMiningFixMod implements WurmMod, Initable, PreInitable, Configurable, ServerStartedListener {
+public class SurfaceMiningFixMod
+        implements WurmMod, Initable, PreInitable, Configurable, ServerStartedListener, ItemTemplatesCreatedListener {
 
     private static final Logger logger = Logger.getLogger(SurfaceMiningFixMod.class.getName());
 
@@ -89,18 +92,19 @@ public class SurfaceMiningFixMod implements WurmMod, Initable, PreInitable, Conf
     public void configure(Properties properties) {
         Constants.debug = Constants.getBoolean(properties, "debug", Constants.debug);
 
+        // Azbantium Fist
         Constants.addAzbantiumFistEnchantment = Constants.getBoolean(properties, "addAzbantiumFistEnchantment",
                 Constants.addAzbantiumFistEnchantment);
 
-        Constants.af_enchantmentId = Byte
-                .valueOf(properties.getProperty("af_enchantmentId", Byte.toString(Constants.af_enchantmentId)));
+        Constants.af_enchantmentId = Byte.valueOf(
+                properties.getProperty("af_enchantmentId", Byte.toString(Constants.af_enchantmentId)).replace(",", ""));
 
-        Constants.af_spellCost = Integer
-                .valueOf(properties.getProperty("af_spellCost", Integer.toString(Constants.af_spellCost)));
-        Constants.af_spellDifficulty = Integer
-                .valueOf(properties.getProperty("af_spellDifficulty", Integer.toString(Constants.af_spellDifficulty)));
-        Constants.af_spellCooldown = Long
-                .valueOf(properties.getProperty("af_spellCooldown", Long.toString(Constants.af_spellCooldown)));
+        Constants.af_spellCost = Integer.valueOf(
+                properties.getProperty("af_spellCost", Integer.toString(Constants.af_spellCost)).replace(",", ""));
+        Constants.af_spellDifficulty = Integer.valueOf(properties
+                .getProperty("af_spellDifficulty", Integer.toString(Constants.af_spellDifficulty)).replace(",", ""));
+        Constants.af_spellCooldown = Long.valueOf(
+                properties.getProperty("af_spellCooldown", Long.toString(Constants.af_spellCooldown)).replace(",", ""));
 
         Constants.af_all = Constants.getBoolean(properties, "af_all", Constants.af_all);
         Constants.af_fo = Constants.getBoolean(properties, "af_fo", Constants.af_fo);
@@ -120,9 +124,23 @@ public class SurfaceMiningFixMod implements WurmMod, Initable, PreInitable, Conf
 
         Constants.af_allowWoA = Constants.getBoolean(properties, "af_allowWoA", Constants.af_allowWoA);
 
+        // Azbantium Pickaxe
+        Constants.addAzbantiumPickaxeItem = Constants.getBoolean(properties, "addAzbantiumPickaxeItem",
+                Constants.addAzbantiumPickaxeItem);
+
+        Constants.ap_decayTime = Long.valueOf(
+                properties.getProperty("ap_decayTime", Long.toString(Constants.ap_decayTime)).replace(",", ""));
+        Constants.ap_difficulty = Float.valueOf(
+                properties.getProperty("ap_difficulty", Float.toString(Constants.ap_difficulty)).replace(",", ""));
+        Constants.ap_weight = Integer
+                .valueOf(properties.getProperty("ap_weight", Integer.toString(Constants.ap_weight)).replace(",", ""));
+
+        Constants.ap_useQuality = Constants.getBoolean(properties, "ap_useQuality", Constants.ap_useQuality);
+
         if (Constants.debug) {
             logger.log(Level.INFO, "debug: " + Constants.debug);
 
+            // Azbantium Fist
             logger.log(Level.INFO, "addAzbantiumFistEnchantment: " + Constants.addAzbantiumFistEnchantment);
 
             logger.log(Level.INFO, "af_enchantmentId: " + Constants.af_enchantmentId);
@@ -145,6 +163,15 @@ public class SurfaceMiningFixMod implements WurmMod, Initable, PreInitable, Conf
             logger.log(Level.INFO, "af_usePower: " + Constants.af_usePower);
 
             logger.log(Level.INFO, "af_allowWoA: " + Constants.af_allowWoA);
+
+            // Azbantium Pickaxe Item
+            logger.log(Level.INFO, "addAzbantiumPickaxeItem: " + Constants.addAzbantiumPickaxeItem);
+
+            logger.log(Level.INFO, "ap_decayTime: " + Constants.ap_decayTime);
+            logger.log(Level.INFO, "ap_difficulty: " + Constants.ap_difficulty);
+            logger.log(Level.INFO, "ap_weight: " + Constants.ap_weight);
+
+            logger.log(Level.INFO, "ap_useQuality: " + Constants.ap_useQuality);
         }
     }
 
@@ -208,22 +235,36 @@ public class SurfaceMiningFixMod implements WurmMod, Initable, PreInitable, Conf
         if (Constants.removeRockRestriction) {
             return true;
         }
+        float power = 0.0F;
+
+        if (Constants.addAzbantiumPickaxeItem && source.getTemplateId() == Constants.ap_id) {
+            if (!Constants.ap_useQuality) {
+                return true;
+            }
+            power = source.getQualityLevel();
+            if (Constants.debug) {
+                logger.log(Level.INFO, "Azbantium Pickaxe: " + power + "QL");
+            }
+        }
         SpellEffect se = source.getSpellEffect(Constants.af_enchantmentId);
         if (se != null) {
             if (!Constants.af_usePower) {
                 return true;
             }
-            float power = se.getPower();
-            float chance = power < 30 ? 25 + power / 5 : power;
+            power = se.getPower();
             if (Constants.debug) {
-                logger.log(Level.INFO, "Chance of rock mining: " + chance + "%");
+                logger.log(Level.INFO, "Azbantium Fist: " + power + " power");
             }
-            return Server.rand.nextFloat() <= chance / 100;
         }
+        return Server.rand.nextFloat() <= getChance(power) / 100;
+    }
+
+    private static float getChance(float power) {
+        float chance = power < 30 ? 25 + power / 5 : power;
         if (Constants.debug) {
-            logger.log(Level.INFO, "Chance of rock mining: 25%");
+            logger.log(Level.INFO, "Chance of rock mining: " + chance + "%");
         }
-        return Server.rand.nextInt(5) == 0;
+        return chance;
     }
 
     private void replaceMineSlopeCondition() throws NotFoundException, BadBytecode {
@@ -266,5 +307,13 @@ public class SurfaceMiningFixMod implements WurmMod, Initable, PreInitable, Conf
 
         new CodeReplacer(codeAttribute).replaceCode(search, replacement);
         methodInfo.rebuildStackMap(classPool);
+    }
+
+    @Override
+    public void onItemTemplatesCreated() {
+        if (Constants.addAzbantiumPickaxeItem) {
+            new AzbantiumPickaxe();
+        }
+
     }
 }

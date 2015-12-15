@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <project default="jar" name="SurfaceMiningFix">
 	<property name="buildDir" value="build/surfaceminingfix" />
-	<property name="version" value="0.1.2" />
+	<property name="version" value="0.2-SNAPSHOT" />
 	<property name="jarName" value="surfaceminingfix-${version}.jar" />
 	<property name="buildPath" value="${buildDir}/${jarName}" />
 
@@ -19,13 +19,14 @@
 
 			<entry key="removeRockRestriction" default="false" />
 
+			<!-- Azbantium Fist Echantment -->
 			<entry key="addAzbantiumFistEnchantment" default="true" />
 
 			<entry key="af_enchantmentId" type="int" default="34" />
 
 			<entry key="af_spellCost" type="int" default="50" />
 			<entry key="af_spellDifficulty" type="int" default="60" />
-			<entry key="af_spellCooldown" type="int" default="0" />
+			<entry key="af_spellCooldown" default="0" />
 
 			<entry key="af_all" default="false" />
 			<entry key="af_fo" default="false" />
@@ -41,6 +42,22 @@
 			<entry key="af_usePower" default="true" />
 
 			<entry key="af_allowWoA" default="false" />
+
+			<!-- Azbantium Pickaxe Item -->
+			<entry key="addAzbantiumPickaxeItem" default="false" />
+
+			<!-- <entry key="ap_decayTime" default="9072000" /> -->
+			<entry key="ap_difficulty" default="20.0" />
+			<entry key="ap_weight" type="int" default="2000" />
+
+			<entry key="ap_useQuality" default="true" />
+
+			<!-- Seafloor Mining Rig Item -->
+			<entry key="addSeafloorMiningRigItem" default="true" />
+
+			<!--  <entry key="smr_decayTime" default="9072000" /> -->
+			<entry key="smr_difficulty" default="30.0" />
+			<entry key="smr_weight" type="int" default="15000" />
 		</propertyfile>
 		<replaceregexp file="build/surfaceminingfix.properties" match="^#.*\n" replace="" />
 	</target>
