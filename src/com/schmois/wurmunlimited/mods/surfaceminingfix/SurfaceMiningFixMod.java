@@ -23,10 +23,12 @@ import org.gotti.wurmunlimited.modsupport.actions.ModActions;
 
 import com.schmois.wurmunlimited.mods.surfaceminingfix.items.AzbantiumPickaxe;
 import com.wurmonline.server.Server;
+import com.wurmonline.server.behaviours.Actions;
 import com.wurmonline.server.creatures.Creature;
 import com.wurmonline.server.deities.Deities;
 import com.wurmonline.server.deities.Deity;
 import com.wurmonline.server.items.Item;
+import com.wurmonline.server.items.SeafloorMiningRig;
 import com.wurmonline.server.spells.AzbantiumFistEnchant;
 import com.wurmonline.server.spells.Spell;
 import com.wurmonline.server.spells.SpellEffect;
@@ -145,9 +147,20 @@ public class SurfaceMiningFixMod
 
         Constants.ap_useQuality = Constants.getBoolean(properties, "ap_useQuality", Constants.ap_useQuality);
 
+        // Seafloor Mining Rig
+        Constants.addSeafloorMiningRigItem = Constants.getBoolean(properties, "addSeafloorMiningRigItem",
+                Constants.addSeafloorMiningRigItem);
+
+        Constants.smr_decayTime = Long.valueOf(
+                properties.getProperty("smr_decayTime", Long.toString(Constants.smr_decayTime)).replace(",", ""));
+        Constants.smr_difficulty = Float.valueOf(
+                properties.getProperty("smr_difficulty", Float.toString(Constants.smr_difficulty)).replace(",", ""));
+        Constants.smr_weight = Integer
+                .valueOf(properties.getProperty("smr_weight", Integer.toString(Constants.smr_weight)).replace(",", ""));
+
         if (Constants.debug) {
             logger.log(Level.INFO, "debug: " + Constants.debug);
-            
+
             logger.log(Level.INFO, "alwaysLowerRockSlope: " + Constants.alwaysLowerRockSlope);
             logger.log(Level.INFO, "noNeedToUnconverRock: " + Constants.noNeedToUnconverRock);
 
@@ -183,6 +196,13 @@ public class SurfaceMiningFixMod
             logger.log(Level.INFO, "ap_weight: " + Constants.ap_weight);
 
             logger.log(Level.INFO, "ap_useQuality: " + Constants.ap_useQuality);
+
+            // Seafloor Mining Rig
+            logger.log(Level.INFO, "addSeafloorMiningRigItem: " + Constants.addSeafloorMiningRigItem);
+
+            logger.log(Level.INFO, "smr_decayTime: " + Constants.smr_decayTime);
+            logger.log(Level.INFO, "smr_difficulty: " + Constants.smr_difficulty);
+            logger.log(Level.INFO, "smr_weight: " + Constants.smr_weight);
         }
     }
 
@@ -247,37 +267,40 @@ public class SurfaceMiningFixMod
                             }
                         });
             } catch (NotFoundException e) {
-                logger.log(Level.INFO, "Broken hook, let dev know", e);
+                logger.log(Level.INFO, "Broken Wind of Ages hook, let dev know", e);
             }
         }
     }
 
-    public static boolean willMineSlope(Creature performer, Item source) {
-        if (Constants.alwaysLowerRockSlope) {
-            return true;
-        }
-        float power = 0.0F;
+    public static boolean willMineSlope(Creature performer, Item source, short action) {
+        if (Actions.isActionMineSurface(action)) {
+            if (Constants.alwaysLowerRockSlope) {
+                return true;
+            }
+            float power = 0.0F;
 
-        if (Constants.addAzbantiumPickaxeItem && source.getTemplateId() == Constants.ap_id) {
-            if (!Constants.ap_useQuality) {
-                return true;
+            if (Constants.addAzbantiumPickaxeItem && source.getTemplateId() == Constants.ap_id) {
+                if (!Constants.ap_useQuality) {
+                    return true;
+                }
+                power = source.getQualityLevel();
+                if (Constants.debug) {
+                    logger.log(Level.INFO, "Azbantium Pickaxe: " + power + "QL");
+                }
             }
-            power = source.getQualityLevel();
-            if (Constants.debug) {
-                logger.log(Level.INFO, "Azbantium Pickaxe: " + power + "QL");
+            SpellEffect se = source.getSpellEffect(Constants.af_enchantmentId);
+            if (se != null) {
+                if (!Constants.af_usePower) {
+                    return true;
+                }
+                power = se.getPower();
+                if (Constants.debug) {
+                    logger.log(Level.INFO, "Azbantium Fist: " + power + " power");
+                }
             }
+            return Server.rand.nextFloat() <= getChance(power) / 100;
         }
-        SpellEffect se = source.getSpellEffect(Constants.af_enchantmentId);
-        if (se != null) {
-            if (!Constants.af_usePower) {
-                return true;
-            }
-            power = se.getPower();
-            if (Constants.debug) {
-                logger.log(Level.INFO, "Azbantium Fist: " + power + " power");
-            }
-        }
-        return Server.rand.nextFloat() <= getChance(power) / 100;
+        return Server.rand.nextInt(5) == 0;
     }
 
     private static float getChance(float power) {
@@ -320,9 +343,10 @@ public class SurfaceMiningFixMod
         bytecode = new Bytecode(methodInfo.getConstPool());
         bytecode.addAload(localNames.get("performer"));
         bytecode.addAload(localNames.get("source"));
-        bytecode.addInvokestatic(classPool.get(this.getClass().getName()), "willMineSlope",
-                Descriptor.ofMethod(CtPrimitiveType.booleanType, new CtClass[] { ctCreature, ctItem }));
-        bytecode.addGap(2);
+        bytecode.addAload(localNames.get("action"));
+        bytecode.addInvokestatic(classPool.get(this.getClass().getName()), "willMineSlope", Descriptor.ofMethod(
+                CtPrimitiveType.booleanType, new CtClass[] { ctCreature, ctItem, CtPrimitiveType.shortType }));
+        bytecode.addGap(1);
         bytecode.add(Bytecode.IFEQ);
         byte[] replacement = bytecode.get();
 
@@ -389,6 +413,8 @@ public class SurfaceMiningFixMod
         if (Constants.addAzbantiumPickaxeItem) {
             new AzbantiumPickaxe();
         }
-
+        if (Constants.addSeafloorMiningRigItem) {
+            new SeafloorMiningRig();
+        }
     }
 }

@@ -59,7 +59,7 @@
 
 			<!--  <entry key="smr_decayTime" default="9072000" /> -->
 			<entry key="smr_difficulty" default="30.0" />
-			<entry key="smr_weight" type="int" default="15000" />
+			<entry key="smr_weight" type="int" default="10000" />
 		</propertyfile>
 		<replaceregexp file="build/surfaceminingfix.properties" match="^#.*\n" replace="" />
 	</target>

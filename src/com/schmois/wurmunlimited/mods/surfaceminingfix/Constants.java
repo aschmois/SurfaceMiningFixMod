@@ -49,7 +49,7 @@ public class Constants {
 
     public static long smr_decayTime = 9072000L;
     public static float smr_difficulty = 30.0F;
-    public static int smr_weight = 15000;
+    public static int smr_weight = 10000;
 
     public static int smr_id;
     
