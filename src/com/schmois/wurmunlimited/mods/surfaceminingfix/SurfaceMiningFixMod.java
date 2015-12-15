@@ -95,6 +95,11 @@ public class SurfaceMiningFixMod
     public void configure(Properties properties) {
         Constants.debug = Constants.getBoolean(properties, "debug", Constants.debug);
 
+        Constants.alwaysLowerRockSlope = Constants.getBoolean(properties, "alwaysLowerRockSlope",
+                Constants.alwaysLowerRockSlope);
+        Constants.noNeedToUnconverRock = Constants.getBoolean(properties, "noNeedToUnconverRock",
+                Constants.noNeedToUnconverRock);
+
         // Azbantium Fist
         Constants.addAzbantiumFistEnchantment = Constants.getBoolean(properties, "addAzbantiumFistEnchantment",
                 Constants.addAzbantiumFistEnchantment);
@@ -142,6 +147,9 @@ public class SurfaceMiningFixMod
 
         if (Constants.debug) {
             logger.log(Level.INFO, "debug: " + Constants.debug);
+            
+            logger.log(Level.INFO, "alwaysLowerRockSlope: " + Constants.alwaysLowerRockSlope);
+            logger.log(Level.INFO, "noNeedToUnconverRock: " + Constants.noNeedToUnconverRock);
 
             // Azbantium Fist
             logger.log(Level.INFO, "addAzbantiumFistEnchantment: " + Constants.addAzbantiumFistEnchantment);
