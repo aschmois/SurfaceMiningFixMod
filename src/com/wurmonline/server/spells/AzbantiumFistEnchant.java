@@ -70,6 +70,9 @@ public class AzbantiumFistEnchant extends ReligiousSpell {
 
     @Override
     void doEffect(final Skill castSkill, double power, final Creature performer, final Item target) {
+        if (isMaxed(performer, target)) {
+            return;
+        }
         if (!isValidTarget(target)) {
             performer.getCommunicator().sendNormalServerMessage("The spell fizzles.");
             return;
@@ -103,8 +106,9 @@ public class AzbantiumFistEnchant extends ReligiousSpell {
 
     @Override
     void doNegativeEffect(final Skill castSkill, final double power, final Creature performer, final Item target) {
-        isMaxed(performer, target);
-        this.checkDestroyItem(power, performer, target);
+        if (!isMaxed(performer, target)) {
+            this.checkDestroyItem(power, performer, target);
+        }
     }
 
     private boolean isMaxed(Creature performer, Item target) {
