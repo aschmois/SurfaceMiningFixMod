@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <project default="jar" name="SurfaceMiningFix">
-	<property name="buildDir" value="build/surfaceminingfix" />
+	<property name="buildDir" value="mods/surfaceminingfix" />
 	<property name="version" value="0.2" />
 	<property name="jarName" value="surfaceminingfix.jar" />
 	<property name="buildPath" value="${buildDir}/${jarName}" />
@@ -10,7 +10,7 @@
 	</path>
 
 	<target name="build-brand" description="Adds version information to branding files.">
-		<propertyfile file="build/surfaceminingfix.properties">
+		<propertyfile file="mods/surfaceminingfix.properties">
 			<entry key="classname" value="com.schmois.wurmunlimited.mods.surfaceminingfix.SurfaceMiningFixMod" />
 			<entry key="classpath" value="${jarName}" />
 			<entry key="sharedClassLoader" value="true" />

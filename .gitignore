@@ -1,6 +1,7 @@
-build/
+mods/surfaceminingfix
 lib/
 .classpath
 .project
 .settings/org.eclipse.jdt.core.prefs
 bin/
+mods/SurfaceMiningFixMod.zip
