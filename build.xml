@@ -2,7 +2,7 @@
 <project default="jar" name="SurfaceMiningFix">
 	<property name="buildDir" value="build/surfaceminingfix" />
 	<property name="version" value="0.2" />
-	<property name="jarName" value="surfaceminingfix-${version}.jar" />
+	<property name="jarName" value="surfaceminingfix.jar" />
 	<property name="buildPath" value="${buildDir}/${jarName}" />
 
 	<path id="jar-project-classpath">
