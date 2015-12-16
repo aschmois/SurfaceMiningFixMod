@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <project default="jar" name="SurfaceMiningFix">
 	<property name="buildDir" value="build/surfaceminingfix" />
-	<property name="version" value="0.2-SNAPSHOT" />
+	<property name="version" value="0.2" />
 	<property name="jarName" value="surfaceminingfix-${version}.jar" />
 	<property name="buildPath" value="${buildDir}/${jarName}" />
 

@@ -1,7 +1,5 @@
 package com.wurmonline.server.spells;
 
-import java.util.logging.Logger;
-
 import org.gotti.wurmunlimited.modsupport.actions.ModActions;
 
 import com.schmois.wurmunlimited.mods.surfaceminingfix.Constants;
