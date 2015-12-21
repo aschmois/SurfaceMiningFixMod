@@ -11,9 +11,7 @@ import org.gotti.wurmunlimited.modsupport.ItemTemplateBuilder;
 
 import com.schmois.wurmunlimited.mods.surfaceminingfix.Constants;
 import com.wurmonline.mesh.Tiles;
-import com.wurmonline.server.Items;
 import com.wurmonline.server.MiscConstants;
-import com.wurmonline.server.NoSuchItemException;
 import com.wurmonline.server.Server;
 import com.wurmonline.server.creatures.Creature;
 
@@ -87,12 +85,12 @@ public class SeafloorMiningRig {
         int tile = Server.surfaceMesh.getTile(digTilex, digTiley);
         int height = Tiles.decodeHeight(tile);
         if (item.getTemplateId() == Constants.smr_id) {
-            if (height < -25) {
+            if (height <= -25) {
                 // TODO: Make SMR hollow
                 if (Constants.debug) {
                     logger.log(Level.INFO, performer.getName() + " is mining with SMR.");
                 }
-                if (performer.getVehicle() != -10L) {
+                /*if (performer.getVehicle() != -10L) { FIXME
                     try {
                         final Item ivehic = Items.getItem(performer.getVehicle());
                         if (ivehic.isBoat()) {
@@ -102,7 +100,8 @@ public class SeafloorMiningRig {
                     }
                 }
                 performer.getCommunicator()
-                        .sendNormalServerMessage("You must be on a boat of some kind to use the SMR.");
+                        .sendNormalServerMessage("You must be on a boat of some kind to use the SMR.");*/
+                return true;
             } else {
                 performer.getCommunicator().sendNormalServerMessage("The rock is too shallow to mine with an SMR.");
             }

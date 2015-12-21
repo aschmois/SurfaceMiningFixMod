@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <project default="jar" name="SurfaceMiningFix">
 	<property name="buildDir" value="mods/surfaceminingfix" />
-	<property name="version" value="0.2" />
+	<property name="version" value="0.2.1" />
 	<property name="jarName" value="surfaceminingfix.jar" />
 	<property name="buildPath" value="${buildDir}/${jarName}" />
 
