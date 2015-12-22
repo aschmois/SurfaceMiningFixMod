@@ -1,4 +1,4 @@
-Made by Schmois, version 0.2
+Made by Schmois, version 0.2.1
 
 Install:
 -Make sure you have ago's mod loader
@@ -10,6 +10,8 @@ Dev link:
 https://github.com/aschmois/SurfaceMiningFixMod
 
 Changelog:
+v0.2.1:
+-Remove boat check for SMR. Temporarily.
 v0.2:
 -Don't allow AF and BotD to exist in the same pickaxe
 -Add libila config option
