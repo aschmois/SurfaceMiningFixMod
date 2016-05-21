@@ -348,6 +348,8 @@ public class SurfaceMiningFixMod
         CtClass ctCreature = classPool.get("com.wurmonline.server.creatures.Creature");
         CtClass ctItem = classPool.get("com.wurmonline.server.items.Item");
         CtClass ctAction = classPool.get("com.wurmonline.server.behaviours.Action");
+        
+        ctTileRockBehaviour.getClassFile().compact();
 
         CtClass[] paramTypes = { ctAction, ctCreature, ctItem, CtPrimitiveType.intType, CtPrimitiveType.intType,
                 CtPrimitiveType.booleanType, CtPrimitiveType.intType, CtPrimitiveType.intType,
@@ -404,6 +406,8 @@ public class SurfaceMiningFixMod
         CtClass ctCreature = classPool.get("com.wurmonline.server.creatures.Creature");
         CtClass ctItem = classPool.get("com.wurmonline.server.items.Item");
         CtClass ctCommunicator = classPool.get("com.wurmonline.server.creatures.Communicator");
+        
+        ctTileRockBehaviour.getClassFile().compact();
 
         CtClass[] paramTypes = { classPool.get("com.wurmonline.server.behaviours.Action"), ctCreature, ctItem,
                 CtPrimitiveType.intType, CtPrimitiveType.intType, CtPrimitiveType.booleanType, CtPrimitiveType.intType,
